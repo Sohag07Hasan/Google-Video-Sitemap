@@ -32,8 +32,9 @@ class amazon_s3{
 		add_menu_page('S3 Video', 'S3 Video', 'manage_options', 's3-video', array(get_class(), 's3_video'));
 
 		// S3 sidebar child pages
-		/*
+		
 		add_submenu_page('s3-video', __('Upload Video','upload-video'), __('Upload Video','upload-video'), 'manage_options', 's3_video_upload_video', array(get_class(), 's3_video_upload_video'));		
+		/*
 		add_submenu_page('s3-video', __('Playlist Management','show-playlists'), __('Playlist Management','show_playlists'), 'manage_options', 's3_video_show_playlist', array(get_class(),'s3_video_show_playlists'));
 		add_submenu_page('s3-video', __('Create Playlist','create-playlist'), __('Create Playlist','create_playlist'), 'manage_options', 's3_video_create_playlist', array(get_class(),'s3_video_create_playlist'));
 		
@@ -48,29 +49,115 @@ class amazon_s3{
 	 * Menu Page to show the existing videos
 	 */
 	static function s3_video(){
+		
+		
 		$existingVideos = array();
 		global $s3;
+		
+		if (!empty($_GET['delete'])) {			
+			$deleted = $s3->delete_object($_GET['bucket'],$_GET['delete']);
+			if ($deleted->isOK()) {
+				$successMsg = $_GET['delete'] . ' was successfully deleted.';
+			}
+		}
+		
+		
 		$buckets = $s3->get_bucket_list();
 		if(is_array($buckets)) :
 			foreach($buckets as $bucket) :
 				$objects = $s3->get_object_list($bucket);
 				if(is_array($objects)):
 					foreach($objects as $object):	
-						$metadata = $s3->get_object_metadata($bucket, $object);
+						$metadata = $s3->get_object_metadata($bucket, $object);						
 						$existingVideos[$bucket][$object] = array(
 							'last-modified' => strtotime($metadata['Headers']['last-modified']),
-							'size' => (int) $metadata['Size']
+							'size' => (int) $metadata['Size'],
+							'url' => $s3->get_object_url($bucket, $object)
 						);							
 						
 					endforeach;
 				endif;
 			endforeach;		
 		endif;
+		//var_dump($existingVideos);
+		//exit;
 		$pluginSettings = self :: get_s3_settings();
 		include VideoSitemapS3 . '/video-management/existing-videos.php';
 		
 	}
 	
+	
+	/*
+	 * contols the upload functionality
+	 */
+	static function s3_video_upload_video(){		
+		$tmpDirectory = self :: s3_video_check_upload_directory();
+		
+		if ((!empty($_FILES)) && ($_FILES['upload_video']['size'] > 0)) {
+			if (($_FILES['upload_video']['type'] !='video/x-flv') && ($_FILES['upload_video']['type'] !='video/mp4') && ($_FILES['upload_video']['type'] !='application/octet-stream')) {
+				$errorMsg = 'You need to provide an .flv or .mp4 file';
+			}
+			else {
+				$fileName = basename($_FILES['upload_video']['name']);
+				$fileName = preg_replace('/[^A-Za-z0-9_.]+/', '', $fileName);
+				$videoLocation = $tmpDirectory . $fileName;
+				if(move_uploaded_file($_FILES['upload_video']['tmp_name'], $videoLocation)) {
+					
+					$s3Result = self::upload_to_s3($_POST['bucket'], $fileName, $videoLocation);
+					switch ($s3Result) {
+		
+						case 0:
+							$errorMsg = 'Request unsucessful check your S3 access credentials';
+						break;	
+		
+						case 1:
+							$successMsg = 'The video has successfully been uploaded to your S3 account';					
+						break;
+						
+						case 2:
+							$successMsg = 'Duplicate File exists! Please rename the file and try';
+						break;
+						
+						case 3:
+							$successMsg = 'Bucket does not exist! Please check the bucket lists';
+						
+					}
+				} 
+				else {
+				$errorMsg = 'Unable to move file to ' . $videoLocation . ' check the permissions and try again.';
+			}
+				}
+		} else {
+			$errorMsg = 'There was an error uploading the video';
+		}
+		
+		include VideoSitemapS3 . '/video-management/upload-video.php';
+	}
+
+	/*
+	 * Uploads the file from the upload dirctory to the s3 storage
+	 */
+	static function upload_to_s3($bucket, $fileName, $videoLocation){
+		global $s3;
+		if($s3->if_bucket_exists($bucket)) :
+			if($s3->if_object_exists($bucket, $fileName)) return 2;
+			
+			$s3->batch()->create_object($bucket, $fileName, array(
+				'fileUpload' => $videoLocation
+			));
+			
+			$file_upload_response = $s3->batch()->send();
+			if ($file_upload_response->areOK()){
+				return 1;
+			}
+			else {return 0;}
+		
+		else :
+			return 3;
+		endif;
+	}
+
+
 	/*
 	* Page to configure plugin settings i.e Amazon access keys etc
 	*/
@@ -171,6 +258,26 @@ class amazon_s3{
 		for ($i = 0, $size =$bytes; $size>1024; $size=$size/1024)
 		$i++;
 		return number_format($size, 2) . ' '  . $units[min($i, count($units) -1 )];
+	}
+	
+	/*
+	 * check for writable direcoty in uploads folder
+	 * creates if not exists
+	 */
+	static function s3_video_check_upload_directory(){
+		
+		if ((is_dir(WP_CONTENT_DIR . '/uploads/s3_videos/')) && (is_writable(WP_CONTENT_DIR . '/uploads/s3_videos/'))) {
+			return WP_CONTENT_DIR . '/uploads/s3_videos/';
+		} 
+		else {
+			if (!is_dir(WP_CONTENT_DIR . '/uploads/')) {
+				mkdir(WP_CONTENT_DIR . '/uploads/', 0755);
+			}
+			mkdir(WP_CONTENT_DIR . '/uploads/s3_videos/', 0755);
+			if ((is_dir(WP_CONTENT_DIR . '/uploads/s3_videos/')) && (is_writable(WP_CONTENT_DIR . '/uploads/s3_videos/'))) {
+				return WP_CONTENT_DIR . '/uploads/s3_videos/';
+			}
+		}
 	}
 
 	

@@ -1,6 +1,5 @@
 <script type="text/javascript">
-	jQuery(function() {
-	  var awsBucket = 'video-sitemap';
+	jQuery(function() {	  
 	  jQuery("#videoListTable").tablesorter();
 	  jQuery("#videoListTable").paginateTable({ rowsPerPage: <?echo $pluginSettings['s3_video_page_result_limit']; ?>});	  
 	  jQuery(".colorBox").colorbox();
@@ -15,11 +14,12 @@
 	  
 	  jQuery("a#getEmbedCode").click(function() {
 		var videoFile = jQuery(this).attr("title"); 
+		var awsBucket = jQuery(this).attr('class');
 		var linkText = '<h2>Video Embed Code</h2><p>Copy and paste the following code to embed the video in pages outside of wordpress: </p><br>';
 		var embedCode = '<object width="640" height="380" id="s3EmbedVideo" name="s3EmbedVideo" data="http://releases.flowplayer.org/swf/flowplayer-3.2.7.swf" type="application/x-shockwave-flash">' +
 						'<param name="movie" value="http://releases.flowplayer.org/swf/flowplayer-3.2.7.swf" />' +
 						'<param name="allowfullscreen" value="true" /><param name="allowscriptaccess" value="always" />' +
-						'<param name="flashvars" value=\'config={"clip":{"url":"http://' + awsBucket + '.s3.amazonaws.com/' + videoFile + '"},"canvas":{"backgroundColor":"#112233"}}}\' />' +
+						'<param name="flashvars" value=\'config={"clip":{"url":"http://' + encodeURI(awsBucket) + '.s3.amazonaws.com/' + encodeURI(videoFile) + '"},"canvas":{"backgroundColor":"#112233"}}}\' />' +
 						'</object>';
 		var copyEmbedCode = '<p><textarea style="width: 600px; height: 300px;" name="embedCode">' + embedCode + '</textarea></p>';
 		jQuery("#videoInfo").html(linkText + copyEmbedCode + '<br>');
@@ -29,12 +29,12 @@
 </script>
 
 <div class="wrap">
-
+<?php screen_icon('upload'); ?>
 <h2>Existing S3 Videos</h2>
 
 <?php if (!empty($successMsg)) { ?>
 	<div id="successMsg">
-		<?php $successMsg; ?>
+		<?php echo $successMsg; ?>
 	</div>
 <?php } ?>
 
@@ -77,19 +77,19 @@
 						</td>
 											
 						<td>
-							<a title="<?php echo $videoname; ?>" href="<?php echo WP_PLUGIN_URL; ?>/s3-video/preview-video.php?base=<?php echo WP_PLUGIN_URL; ?>/s3-video/&media=<?php echo 'http://' . $pluginSettings['amazon_video_bucket'] .'.'.$pluginSettings['amazon_url'] . '/' .urlencode($videoname['name']); ?>" class="colorBox">
+							<a title="<?php echo $videoname; ?>" href="<?php echo VideoSitemapURL . '/amazon-s3/video-management/preview-video.php?base=' . VideoSitemapURL . '/amazon-s3/&media=' . $videometa['url']; ?>" class="colorBox">
 								Preview
 							</a>
 							 - 
-							<a href="admin.php?page=s3-video&delete=<?= $videoname; ?>">
+							 <a href="admin.php?page=s3-video&bucket=<?php echo $bucketName; ?>&delete=<?php echo urlencode($videoname); ?>">
 								Delete
 							</a>	
 							 -
-							<a href="#" title="<?php echo $existingVide; ?>" id="getShortLink">
+							<a href="#" title="<?php echo $videoname; ?>" id="getShortLink">
 								Get Shortlink
 							</a>
 							 -
-							<a href="#" title="<?php echo $videoname; ?>" id="getEmbedCode">
+							<a href="#" title="<?php echo $videoname; ?>" id="getEmbedCode" class="<?php echo $bucketName; ?>" />
 								Get Embed Code
 							</a>							
 						</td>
