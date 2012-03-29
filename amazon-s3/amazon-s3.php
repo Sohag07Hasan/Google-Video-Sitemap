@@ -7,8 +7,10 @@
 /*
  * including the php sdk for amazon
  */
+
+$settings = amazon_s3 :: get_s3_settings();
 include VideoSitemapS3 . '/sdk-1.5.3/sdk.class.php';
-$s3 = new AmazonS3(array('key'=>'AKIAJAJQPZFJO4ZDQC6Q', 'secret'=>'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'));
+$s3 = new AmazonS3(array('key'=>$settings['amazon_access_key'], 'secret'=>$settings['amazon_secret_access_key']));
 
 
 class amazon_s3{
@@ -90,7 +92,9 @@ class amazon_s3{
 	/*
 	 * contols the upload functionality
 	 */
-	static function s3_video_upload_video(){		
+	static function s3_video_upload_video(){
+		global $s3;
+		
 		$tmpDirectory = self :: s3_video_check_upload_directory();
 		
 		if ((!empty($_FILES)) && ($_FILES['upload_video']['size'] > 0)) {
@@ -122,6 +126,11 @@ class amazon_s3{
 							$successMsg = 'Bucket does not exist! Please check the bucket lists';
 						
 					}
+					
+					// delete the existing file from the local server
+					if($s3Result){
+						unlink($videoLocation);
+					}
 				} 
 				else {
 				$errorMsg = 'Unable to move file to ' . $videoLocation . ' check the permissions and try again.';
@@ -131,6 +140,7 @@ class amazon_s3{
 			$errorMsg = 'There was an error uploading the video';
 		}
 		
+		$buckets = $s3->get_bucket_list();
 		include VideoSitemapS3 . '/video-management/upload-video.php';
 	}
 
@@ -142,9 +152,7 @@ class amazon_s3{
 		if($s3->if_bucket_exists($bucket)) :
 			if($s3->if_object_exists($bucket, $fileName)) return 2;
 			
-			$s3->batch()->create_object($bucket, $fileName, array(
-				'fileUpload' => $videoLocation
-			));
+			$s3->batch()->create_object($bucket, $fileName, array(	'fileUpload' => $videoLocation, 'acl' => AmazonS3::ACL_PUBLIC));
 			
 			$file_upload_response = $s3->batch()->send();
 			if ($file_upload_response->areOK()){

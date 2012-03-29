@@ -17,7 +17,11 @@
 <div class="wrap">
 	<?php screen_icon('upload'); ?>
 	<h2>Upload Video</h2>
-	
+		<?php
+			if(empty($buckets)) {
+				echo "<div class='error'><p> Please create a bucket and try to upload the video </p></div>";
+			}
+		?>
 		<p>Upload an .flv or mp4 file with the form below to your S3 bucket.</p>
 
 		<form method="POST" id="videoUpload" enctype="multipart/form-data">
@@ -41,7 +45,9 @@
 					<td>
 						<label for="bucket">
 							<select name="bucket" class="required">
-								<option value="video-sitemap">video sitemap</option>
+								<?php foreach($buckets as $bucket) : ?>
+								<option value="<?php echo $bucket?>"><?php echo $bucket; ?></option>
+								<?php endforeach; ?>
 							</select>
 						</label>
 					</td>
