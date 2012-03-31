@@ -11,9 +11,17 @@ define('VideoSitemapDir', dirname(__FILE__));
 define('VideoSitemapURL', plugins_url('', __FILE__));
 define('Video-Sitemap-File', __FILE__);
 define('VideoSitemapS3', VideoSitemapDir .'/amazon-s3');
+define('VideoSitemapYT', VideoSitemapDir .'/youtube');
 
 //including classes
 include VideoSitemapS3 . '/amazon-s3.php';
+include VideoSitemapYT .  '/youtube.php';
+
+
+/*
+ * initiating the init functions
+ */
 amazon_s3 :: init();
+youtube :: init();
 
 ?>
