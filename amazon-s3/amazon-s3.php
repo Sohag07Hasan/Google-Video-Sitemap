@@ -235,16 +235,16 @@ class amazon_s3{
 		//common files for both admin and front-end/ player
 		wp_enqueue_script('jquery');
 		wp_enqueue_script('swfobject');
-		wp_enqueue_script('flowPlayer', VideoSitemapURL . '/amazon-s3/js/flowplayer-3.2.6.js', array('jquery'), '1.0');
-		wp_enqueue_script('flowPlayerPlaylist', VideoSitemapURL . '/amazon-s3/js/jquery.playlist.js', array('jquery'), '1.0');
+		wp_enqueue_script('flowPlayer', VideoSitemapURL . '/amazon-s3/js/flowplayer-3.2.6.js', array('jquery'));
+		wp_enqueue_script('flowPlayerPlaylist', VideoSitemapURL . '/amazon-s3/js/jquery.playlist.js', array('jquery'));
 		
-		wp_enqueue_script('validateJSs', VideoSitemapURL . '/amazon-s3/js/jquery.validate.js', array('jquery'), '1.0');
-		wp_enqueue_script('placeholdersJS', VideoSitemapURL . '/amazon-s3/js/jquery.placeholders.js', array('jquery'), '1.0');
-		wp_enqueue_script('colorBox', VideoSitemapURL . '/amazon-s3/js/jquery.colorbox.js', array('jquery'), '1.0');
-		wp_enqueue_script('tableSorter', VideoSitemapURL . '/amazon-s3/js/jquery.tablesorter.js', array('jquery'), '1.0');	
-		wp_enqueue_script('tablePaginator', VideoSitemapURL . '/amazon-s3/js/jquery.paginator.js', array('jquery'), '1.0');	
-		wp_enqueue_script('multiSelect', VideoSitemapURL . '/amazon-s3/js/jquery.multiselect.js', array('jquery'), '1.0');		
-		wp_enqueue_script('dragDropTable', VideoSitemapURL . '/amazon-s3/js/jquery.tablednd.js', array('jquery'), '1.0');		
+		wp_enqueue_script('validateJSs', VideoSitemapURL . '/amazon-s3/js/jquery.validate.js', array('jquery'));
+		wp_enqueue_script('placeholdersJS', VideoSitemapURL . '/amazon-s3/js/jquery.placeholders.js', array('jquery'));
+		wp_enqueue_script('colorBox', VideoSitemapURL . '/amazon-s3/js/jquery.colorbox.js', array('jquery'));
+		wp_enqueue_script('tableSorter', VideoSitemapURL . '/amazon-s3/js/jquery.tablesorter.js', array('jquery'));	
+		wp_enqueue_script('tablePaginator', VideoSitemapURL . '/amazon-s3/js/jquery.paginator.js', array('jquery'));	
+		wp_enqueue_script('multiSelect', VideoSitemapURL . '/amazon-s3/js/jquery.multiselect.js', array('jquery'));		
+		wp_enqueue_script('dragDropTable', VideoSitemapURL . '/amazon-s3/js/jquery.tablednd.js', array('jquery'));		
 	}
 	
 	
