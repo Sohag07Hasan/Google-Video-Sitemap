@@ -19,7 +19,8 @@ jQuery(document).ready(function($){
 				'vid' : videoId			
 			},
 			success:function(result){
-				$('#show_message').html(result);	
+				$('#show_message').html(result);
+				return false;
 			},
 
 			error: function(jqXHR, textStatus, errorThrown){
@@ -31,5 +32,13 @@ jQuery(document).ready(function($){
 	});
 		
 	return false;
+	
+	
+	/*
+	 *Youtube player preview
+	 */
+	$('.colorBox').click(function(){
+		alert($(this).attr());
+	});
 
 });

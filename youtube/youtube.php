@@ -5,6 +5,8 @@
 
 // setting the include path
 session_start();
+$_SESSION['developerKey'] =  trim(get_option('site-map-youtube-devkey'));
+
 $oldinpath = get_include_path();
 set_include_path(VideoSitemapYT);
 
@@ -52,19 +54,66 @@ class youtube{
 		add_menu_page('Youtube Video', 'Youtube Video', 'manage_options', 'youtube-video', array(get_class(), 'youtube_video'));
 	
 		//child pages
-		add_submenu_page('youtube-video', __('Upload Video','upload-video'), __('Upload Video','upload-video'), 'manage_options', 'youtube_video_upload_video', array(get_class(), 'youtube_video_upload_video'));		
+		add_submenu_page('youtube-video', __('Upload Video','upload-video'), __('Upload Video','upload-video'), 'manage_options', 'youtube_video_upload_video', array(get_class(), 'youtube_video_upload_video'));
+		add_submenu_page('youtube-video', __('Youtube Settings','youtube-setting'), __('Youtube Settings','youtube-setting'), 'manage_options', 'youtube_video_settings', array(get_class(), 'youtube_settings'));
 		
 	}
 	
 	/*
+	 * you tube settings to update developers key
+	 */
+	static function youtube_settings(){
+		include VideoSitemapYT . '/settings/developers-key-form.php';
+	}
+
+
+
+
+	/*
 	 * existing youtube menu
 	 */
 	static function youtube_video(){
-		$youTubeService = new Zend_Gdata_YouTube();
-		$feed = $youTubeService->getUserUploads('sohaghyde');
-		
-		include VideoSitemapYT . '/video-management/existing-videos.php';
-		
+		//call some helper function		
+		self :: activateAuthentication();	
+		if(self::authenticated()) :
+			
+			//http client object
+			$httpClient = self::getAuthSubHttpClient();
+			$youTubeService = new Zend_Gdata_YouTube($httpClient);
+			
+			//setting protocol version
+			$youTubeService->setMajorProtocolVersion(2);
+			
+			//setup query parameters
+		/*	$query = $youTubeService->newVideoQuery();
+			$query->setOrderBy('title');
+			$query->setStartIndex(1);
+			$query->setMaxResults(1);
+			*/
+			try {
+				$feed = $youTubeService->getUserUploads('default');
+				
+			}
+			catch (Zend_Gdata_App_HttpException $httpException) {
+				print 'ERROR ' . $httpException->getMessage()
+					. ' HTTP details<br /><textarea cols="100" rows="20">'
+					. $httpException->getRawResponseBody()
+					. '</textarea><br />'
+					. '<a href="session_details.php">'
+					. 'click here to view details of last request</a><br />';
+				return;
+			}
+			catch (Zend_Gdata_App_Exception $e) {
+				print 'ERROR - Could not retrieve users video feed: '
+					. $e->getMessage() . '<br />';
+				return;
+			}
+						
+			
+			include VideoSitemapYT . '/video-management/existing-videos.php';
+		else :
+			self :: generateAuthSubRequestLink();
+		endif;
 		
 	}
 	
@@ -247,8 +296,7 @@ class youtube{
 	*
 	* @return void
 	*/
-	private static function generateUrlInformation($page){		
-		$_SESSION['developerKey'] = 'AI39si5V2LjrZo5LQwiM_MysYSHPnR0Xdazts5FNvTWroyzHjZusK4dd0dTJmJcxu_ew36qQ_R9ys-xLMQFm7DfNhudIdM-b9w';		
+	private static function generateUrlInformation($page){				
 		$_SESSION['operationsUrl'] = get_option('siteurl') . '/wp-admin/admin.php?page=' . $page;
 		$_SESSION['homeUrl'] = get_option('siteurl') . '/wp-admin/admin.php?page=' . $page;			
 		
@@ -312,7 +360,7 @@ class youtube{
 		
 		//include the upload form
 		$action_url = $postUrl . '?nexturl=' . $nextUrl;
-		include __DIR__ . '/video-management/upload-form.php';
+		include dirname(__FILE__) . '/video-management/upload-form.php';
 	}
 	
 	/**
@@ -377,6 +425,21 @@ class youtube{
 		}
 		print $message;
 		exit;
+	}
+	
+	/**
+	* Finds the URL for the flash representation of the specified video.
+	*
+	* @param Zend_Gdata_YouTube_VideoEntry $entry The video entry
+	* @return (string|null) The URL or null, if the URL is not found
+	*/
+	static function findFlashUrl($entry){
+		foreach ($entry->mediaGroup->content as $content) {
+			if ($content->type === 'application/x-shockwave-flash') {
+				return $content->url;
+			}
+		}
+		return null;
 	}
 	
 }
