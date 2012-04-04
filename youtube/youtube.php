@@ -84,6 +84,12 @@ class youtube{
 			//setting protocol version
 			$youTubeService->setMajorProtocolVersion(2);
 			
+			//delete controling
+			if($_GET['action'] == 'd' && !empty($_GET['vid'])){
+				$del_msg = self :: deleteVideo($_GET['vid'], $httpClient, $youTubeService);
+			}
+			
+			
 			//setup query parameters
 		/*	$query = $youTubeService->newVideoQuery();
 			$query->setOrderBy('title');
@@ -95,12 +101,8 @@ class youtube{
 				
 			}
 			catch (Zend_Gdata_App_HttpException $httpException) {
-				print 'ERROR ' . $httpException->getMessage()
-					. ' HTTP details<br /><textarea cols="100" rows="20">'
-					. $httpException->getRawResponseBody()
-					. '</textarea><br />'
-					. '<a href="session_details.php">'
-					. 'click here to view details of last request</a><br />';
+				 echo '<div class="error"><p>ERROR ' . $httpException->getMessage() . '</p></div>';
+								
 				return;
 			}
 			catch (Zend_Gdata_App_Exception $e) {
@@ -442,4 +444,31 @@ class youtube{
 		return null;
 	}
 	
+	/**
+	* Deletes a Video.
+	*activateAuthor is already called
+	* @param string $videoId Id of the video to be deleted.
+	* @return void
+	*/
+	static function deleteVideo($videoId, $httpClient, $youTubeService){
+		
+		// check if videoEntryToUpdate was found
+		$videoEntryToDelete = $youTubeService->getFullVideoEntry($id);
+		
+		if (!$videoEntryToDelete instanceof Zend_Gdata_YouTube_VideoEntry) {
+			return '<div class="error"><p>ERROR - Could not find a video entry with id ' . $videoId . '<p></div><br />';
+			
+		}
+				
+		
+		try{
+			$httpResponse = $youTubeService->delete($videoEntryToDelete);
+		}
+		catch (Zend_Gdata_App_Exception $e){
+			return '<div class="error"><p>ERROR - Could not delete video: '. $e->getMessage() . '</p></div>';
+			  
+		}
+		
+		return '<div class="updated"><p>Entry deleted succesfully.<br />' . $httpResponse->getBody() . '</p></div>';
+	}
 }

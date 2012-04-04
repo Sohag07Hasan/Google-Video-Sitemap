@@ -7,7 +7,7 @@
 	  jQuery("a#getShortLink").click(function() {
 		var videoFile = jQuery(this).attr("title"); 
 		var linkText = '<h2>Wordpress Shortcode</h2><p>Copy and paste the following shortcode into the page or post where you would like to embed your video: </p><br>';
-		var shortLink = '<p>[S3_embed_video file=\"' + videoFile + '\"]</p>';
+		var shortLink = '<p>[youtube_embed_video file=\"' + videoFile + '\"]</p>';
 		jQuery("#videoInfo").html(linkText + shortLink + '<br>');
 		jQuery().colorbox({width:"50%", inline:true, href:"#videoInfo"});
 	  });	  
@@ -18,6 +18,13 @@
 <div class="wrap">
 	<?php screen_icon('upload'); ?>
 	<h2>Existing Youtube Videos</h2>
+	
+	<?php
+		if($del_msg){
+			echo $del_msg;
+		}
+	?>
+	
 	<table id="videoListTable" class="tablesorter" cellspacing="0" >
 		<thead>
 				<tr>
@@ -31,10 +38,12 @@
 			
 			<tbody>
 				<?php
+					$ypage = get_option('siteurl') . '/wp-admin/admin.php?page=youtube-video';
 					foreach ($feed as $entry){
 						$url = VideoSitemapURL . '/youtube/video-management/preview-video.php?';
 						$url .= 'title=' . urlencode(htmlspecialchars($entry->getVideoTitle()));
 						$url .= '&url=' . htmlspecialchars(self::findFlashUrl($entry));
+						$delete_url = $ypage . '&action=d&vid=' . $entry->getVideoId();
 						
 					?>
 						<tr>
@@ -44,11 +53,10 @@
 							<td><?php echo $entry->getVideoViewCount(); ?></td>
 							<td>
 								<a class="colorBox" title="<?php echo htmlspecialchars($entry->getVideoTitle()); ?>" href=<?php echo $url; ?> id="<?php echo  $entry->getVideoId();  ?>" >Preview</a>
-								<a href="#">Edit</a>
-								<a href="#">Delete</a>
+								<a href="#<?php //echo $entry->getEditLink()->getHref();?>">Edit</a>
+								<a href="<?php echo $delete_url; ?>">Delete</a>
 								<a href="#" title="<?php echo htmlspecialchars($entry->getVideoTitle()); ?>" id="getShortLink">
-								Get Shortlink</a>
-															
+								Get Shortlink</a>															
 							</td>
 						</tr>
 					<?php

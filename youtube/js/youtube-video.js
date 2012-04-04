@@ -32,13 +32,5 @@ jQuery(document).ready(function($){
 	});
 		
 	return false;
-	
-	
-	/*
-	 *Youtube player preview
-	 */
-	$('.colorBox').click(function(){
-		alert($(this).attr());
-	});
-
+		
 });
