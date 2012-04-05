@@ -7,7 +7,7 @@
 	  jQuery("a#getShortLink").click(function() {
 		var videoFile = jQuery(this).attr("title"); 
 		var linkText = '<h2>Wordpress Shortcode</h2><p>Copy and paste the following shortcode into the page or post where you would like to embed your video: </p><br>';
-		var shortLink = '<p>[youtube_embed_video file=\"' + videoFile + '\"]</p>';
+		var shortLink = '<p>[Youtube_embed_video src="http://www.youtube.com/embed/' + videoFile + '" width="500" height="395" class=""]</p>';
 		jQuery("#videoInfo").html(linkText + shortLink + '<br>');
 		jQuery().colorbox({width:"50%", inline:true, href:"#videoInfo"});
 	  });	  
@@ -55,7 +55,7 @@
 								<a class="colorBox" title="<?php echo htmlspecialchars($entry->getVideoTitle()); ?>" href=<?php echo $url; ?> id="<?php echo  $entry->getVideoId();  ?>" >Preview</a>
 								<a href="#<?php //echo $entry->getEditLink()->getHref();?>">Edit</a>
 								<a href="<?php echo $delete_url; ?>">Delete</a>
-								<a href="#" title="<?php echo htmlspecialchars($entry->getVideoTitle()); ?>" id="getShortLink">
+								<a href="#" title="<?php echo $entry->getVideoId(); ?>" id="getShortLink">
 								Get Shortlink</a>															
 							</td>
 						</tr>

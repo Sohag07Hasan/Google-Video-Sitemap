@@ -7,7 +7,7 @@
 	  jQuery("a#getShortLink").click(function() {
 		var videoFile = jQuery(this).attr("href"); 
 		var linkText = '<h2>Wordpress Shortcode</h2><p>Copy and paste the following shortcode into the page or post where you would like to embed your video: </p><br>';
-		var shortLink = '<p>[S3_embed_video file=\"' + videoFile + '\"]</p>';
+		var shortLink = '<p>[S3_embed_video file="' + videoFile + '"]</p>';
 		jQuery("#videoInfo").html(linkText + shortLink + '<br>');
 		jQuery().colorbox({width:"50%", inline:true, href:"#videoInfo"});
 		return false;

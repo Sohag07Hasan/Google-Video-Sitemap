@@ -29,7 +29,45 @@ class youtube{
 		
 		//ajax functions are calling
 		add_action('wp_ajax_get_upload_details', array(get_class(), 'checkUpload'));
+		
+		//shotcode api
+		add_shortcode( 'Youtube_embed_video', array(get_class(), 'youtube_video_embed_video'));
 	}
+	
+	/*
+	 * shotcode manipulation
+	 */
+	static function youtube_video_embed_video($atts){
+		if (!isset($atts['width'])) {$atts['width']="100%";}
+		if (!isset($atts['height'])) {$atts['height']="400px";}
+		if (!isset($atts['class'])) {$atts['class']="";}
+		if (!isset($atts['id'])) {$atts['id']="";}
+		$thesrc = $atts['src'];
+		$width=$atts['width'];
+		$height=$atts['height'];
+		$class=$atts['class'];
+		$id=$atts['id'];
+		// Model output to look like the following:
+		// <iframe width="425" height="349" class="myclass" id="myid" 
+		// src="http://www.youtube.com/embed/olB56IEXpvE" 
+		// frameborder="0" allowfullscreen></iframe>
+		$embed_string =
+			"<iframe width=\"". $width . "\" " . 
+			"height=\"" . $height . "\" " .
+			"class=\"" . $class . "\" " .
+			"id=\"" . $id . "\" " .
+			"src=\"" . $thesrc . "\" " . 
+			"frameborder=\"0\" allowfullscreen>" . 
+			"</iframe>" .
+			"";
+
+		if ( isset($atts['debug']) ) {
+			$embed_string = $embed_string . "<br>Here are the parameters:<br> width=".$width." height=".$height." class=".$class." id=".$id." src=".$thesrc." debug=".$atts['debug']."<br>";
+		} 
+
+		return $embed_string;  
+	}
+	
 	
 	
 	
