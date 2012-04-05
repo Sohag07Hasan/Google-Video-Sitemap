@@ -23,9 +23,28 @@ class amazon_s3{
 		add_action('admin_print_styles', array(get_class(), 's3_video_load_css'));
 		add_action('admin_print_scripts', array(get_class(),'s3_video_load_js'));
 		add_action('wp_print_scripts', array(get_class(),'s3_video_load_js_player'));
+		
+		//shotcode for the video
+		add_shortcode( 'S3_embed_video', array(get_class(), 's3_video_embed_video'));
+		
 	}
 	
 	
+	/*
+	 * shows videos on posts and page 
+	 */
+	static function s3_video_embed_video($embedDetails){
+		//if($embedDetails['file'])
+		if ($embedDetails['file']) {
+			$videoFile =  $embedDetails['file'];			
+		}
+		
+		include VideoSitemapS3 . '/video-management/play-video.php';
+	}
+
+
+
+
 	/*
 	 * Creates a Menu to contol the S3 functionality 
 	 */
