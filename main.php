@@ -16,12 +16,13 @@ define('VideoSitemapYT', VideoSitemapDir .'/youtube');
 //including classes
 include VideoSitemapS3 . '/amazon-s3.php';
 include VideoSitemapYT .  '/youtube.php';
-
+include VideoSitemapDir . '/site-map-creator/site-map-creator.php';
 
 /*
  * initiating the init functions
  */
 amazon_s3 :: init();
 youtube :: init();
+xml_site_map_creator :: init();
 
 ?>
